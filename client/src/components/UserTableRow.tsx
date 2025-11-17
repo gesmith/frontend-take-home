@@ -28,7 +28,7 @@ const UserTableRow = ({ user, roles }: UserTableRowProps) => {
   const userRole = findRole(roles, user.roleId)?.name;
   const formattedDate = format(user.createdAt, "PP");
   return (
-    <Table.Row key={user.id} align="center">
+    <Table.Row align="center">
       <Table.RowHeaderCell py="2">
         <Flex gap="2" align="center">
           <Avatar
