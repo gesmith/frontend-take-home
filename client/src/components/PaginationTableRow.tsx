@@ -1,4 +1,4 @@
-import { Button, Flex, Table } from "@radix-ui/themes";
+import { Button, Table } from "@radix-ui/themes";
 
 type PaginationTableRowProps = {
   isPreviousDisabled: boolean;

@@ -1,30 +1,23 @@
-import {
-  Tabs,
-  Box,
-  Text,
-  Table,
-  IconButton,
-  Button,
-  Flex,
-  Avatar,
-} from "@radix-ui/themes";
-import { DotsHorizontalIcon, PlusIcon } from "@radix-ui/react-icons";
+import { Tabs, Box, Text, Table, Button, Flex } from "@radix-ui/themes";
+import { PlusIcon } from "@radix-ui/react-icons";
 import { useCallback, useEffect, useState } from "react";
-import { format as formatDate } from "date-fns";
 import { fetchUsers, fetchRoles } from "../api/users";
 import PaginationTableRow from "../components/PaginationTableRow";
 import SearchInput from "../components/SearchInput";
+import UserTableRow from "../components/UserTableRow";
+import { type User, type Role } from "../types";
 
-export default function UserManagementPage() {
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [searchResults, setSearchResults] = useState("");
+const UserRoleDirectoryPage = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [searchResults, setSearchResults] = useState<User[]>([]);
   const [searchInputValue, setSearchInputValue] = useState("");
 
   useEffect(() => {
     const getUsers = async () => {
       const usersResult = await fetchUsers();
       setUsers(usersResult.data);
+      setSearchResults(usersResult.data);
     };
     const getRoles = async () => {
       const rolesResult = await fetchRoles();
@@ -34,42 +27,44 @@ export default function UserManagementPage() {
     Promise.all([getUsers(), getRoles()]);
   }, []);
 
+  const filterUsersByName = (users: User[], searchQuery: string) => {
+    return users.filter((user) => {
+      const fullName = `${user.first} ${user.last}`.toLowerCase();
+      return fullName.includes(searchQuery);
+    });
+  };
+
   const onSearchChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = event.target;
       setSearchInputValue(value);
+      setSearchResults(filterUsersByName(users, value));
     },
-    []
+    [users]
   );
-
-  const findRole = (roleId: string) => {
-    if (!roleId) return;
-    return roles.find((role) => role.id === roleId);
-  };
 
   return (
     <Tabs.Root defaultValue="account">
-      <Tabs.List>
+      <Tabs.List mb="5">
         <Tabs.Trigger value="account">Users</Tabs.Trigger>
         <Tabs.Trigger value="documents">Roles</Tabs.Trigger>
       </Tabs.List>
 
-      <Flex gap="3" mt="5" mb="4">
-        <Box flexGrow="1">
-          <SearchInput
-            placeholder="Search by name..."
-            searchInputValue={searchInputValue}
-            onChange={onSearchChange}
-          />
-        </Box>
-        <Box>
-          <Button>
-            <PlusIcon /> Add User
-          </Button>
-        </Box>
-      </Flex>
-
-      <Box pt="3">
+      <Box>
+        <Flex gap="3" mb="5">
+          <Box flexGrow="1">
+            <SearchInput
+              placeholder="Search by name..."
+              searchInputValue={searchInputValue}
+              onChange={onSearchChange}
+            />
+          </Box>
+          <Box>
+            <Button>
+              <PlusIcon /> Add User
+            </Button>
+          </Box>
+        </Flex>
         <Tabs.Content value="account">
           <Table.Root variant="surface">
             <Table.Header>
@@ -82,33 +77,17 @@ export default function UserManagementPage() {
             </Table.Header>
 
             <Table.Body>
-              {users.map((user) => (
-                <Table.Row key={user.id} align="center">
-                  <Table.RowHeaderCell py="2">
-                    <Flex gap="2" align="center">
-                      <Avatar
-                        size="1"
-                        radius="full"
-                        src={user.photo}
-                        fallback={user.first}
-                      />
-                      {user.first} {user.last}
-                    </Flex>
-                  </Table.RowHeaderCell>
-                  <Table.Cell>{findRole(user.roleId)?.name}</Table.Cell>
-                  <Table.Cell>{formatDate(user.createdAt, "PP")}</Table.Cell>
-                  <Table.Cell justify="end">
-                    <IconButton variant="ghost" radius="full">
-                      <DotsHorizontalIcon
-                        width="16"
-                        color="gray"
-                        enableBackground="true"
-                        height="16"
-                      />
-                    </IconButton>
+              {searchInputValue && searchResults.length === 0 ? (
+                <Table.Row align="center">
+                  <Table.Cell colSpan={4}>
+                    Sorry, we couldn't find any names that contain that query.
                   </Table.Cell>
                 </Table.Row>
-              ))}
+              ) : (
+                searchResults?.map((user) => (
+                  <UserTableRow key={user.id} user={user} roles={roles} />
+                ))
+              )}
               <PaginationTableRow
                 onClickNext={() => {}}
                 onClickPrevious={() => {}}
@@ -130,4 +109,6 @@ export default function UserManagementPage() {
       </Box>
     </Tabs.Root>
   );
-}
+};
+
+export default UserRoleDirectoryPage;
