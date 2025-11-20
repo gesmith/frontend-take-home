@@ -1,4 +1,4 @@
-import UserRoleDirectoryPage from "../pages/UserRoleDirectoryPage";
+import UserRoleDirectoryPage from "./pages/UserRoleDirectoryPage";
 
 /* Keeping this parent component in case we want to add additional pages, routing, etc. */
 const App = () => {

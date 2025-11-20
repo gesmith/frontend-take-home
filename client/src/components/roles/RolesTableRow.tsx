@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { DotsHorizontalIcon, StarFilledIcon } from "@radix-ui/react-icons";
 import { Table, Flex, DropdownMenu, IconButton } from "@radix-ui/themes";
-import { format } from "date-fns";
-import type { Role } from "../types";
-import { useState } from "react";
+import type { Role } from "@/types";
+import EditRoleModal from "./EditRoleModal";
+import { formatDateTime } from "@/utils/dates";
 
 type RoleTableRowProps = {
   role: Role;
@@ -10,7 +11,12 @@ type RoleTableRowProps = {
 
 const RoleTableRow = ({ role }: RoleTableRowProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const formattedDate = format(role.createdAt, "PP");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const formattedDate = formatDateTime(role.createdAt, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
   return (
     <Table.Row align="center">
       <Table.RowHeaderCell py="2">
@@ -22,7 +28,7 @@ const RoleTableRow = ({ role }: RoleTableRowProps) => {
       <Table.Cell>{role.description}</Table.Cell>
       <Table.Cell>{formattedDate}</Table.Cell>
       <Table.Cell justify="end">
-        <DropdownMenu.Root>
+        <DropdownMenu.Root modal={false}>
           <DropdownMenu.Trigger>
             <IconButton variant="ghost" radius="full">
               <DotsHorizontalIcon
@@ -37,7 +43,13 @@ const RoleTableRow = ({ role }: RoleTableRowProps) => {
             <DropdownMenu.Item disabled={role.isDefault}>
               Set as default
             </DropdownMenu.Item>
-            <DropdownMenu.Item disabled>Edit role</DropdownMenu.Item>
+            <DropdownMenu.Item
+              onClick={() => {
+                setIsEditModalOpen(true);
+              }}
+            >
+              Edit role
+            </DropdownMenu.Item>
             <DropdownMenu.Item
               onClick={() => {
                 setIsDeleteModalOpen(true);
@@ -47,6 +59,11 @@ const RoleTableRow = ({ role }: RoleTableRowProps) => {
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
+        <EditRoleModal
+          role={role}
+          isOpen={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+        />
       </Table.Cell>
     </Table.Row>
   );

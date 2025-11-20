@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import {
   Table,
@@ -6,14 +7,14 @@ import {
   DropdownMenu,
   IconButton,
 } from "@radix-ui/themes";
-import { format } from "date-fns";
-import type { Role, User } from "../types";
+import type { Role, User } from "@/types";
+import { formatDateTime } from "@/utils/dates";
 import DeleteUserModal from "./DeleteUserModal";
-import { useState } from "react";
 
-type UserTableRowProps = {
+type UsersTableRowProps = {
   user: User;
   roles: Role[];
+  fetch: () => void;
 };
 
 const findRole = (roles: Role[], roleId: string) => {
@@ -21,12 +22,17 @@ const findRole = (roles: Role[], roleId: string) => {
   return roles?.find((role) => role.id === roleId);
 };
 
-const UserTableRow = ({ user, roles }: UserTableRowProps) => {
+const UsersTableRow = ({ user, roles, fetch }: UsersTableRowProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const userFullName = `${user.first} ${user.last}`;
   const userRole = findRole(roles, user.roleId)?.name;
-  const formattedDate = format(user.createdAt, "PP");
+  const formattedDate = formatDateTime(user.createdAt, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
   return (
     <Table.Row align="center">
       <Table.RowHeaderCell py="2">
@@ -43,7 +49,7 @@ const UserTableRow = ({ user, roles }: UserTableRowProps) => {
       <Table.Cell>{userRole}</Table.Cell>
       <Table.Cell>{formattedDate}</Table.Cell>
       <Table.Cell justify="end">
-        <DropdownMenu.Root>
+        <DropdownMenu.Root modal={false}>
           <DropdownMenu.Trigger>
             <IconButton variant="ghost" radius="full">
               <DotsHorizontalIcon
@@ -70,10 +76,11 @@ const UserTableRow = ({ user, roles }: UserTableRowProps) => {
           isOpen={isDeleteModalOpen}
           userFullName={userFullName}
           userId={user.id}
+          refetch={fetch}
         />
       </Table.Cell>
     </Table.Row>
   );
 };
 
-export default UserTableRow;
+export default UsersTableRow;

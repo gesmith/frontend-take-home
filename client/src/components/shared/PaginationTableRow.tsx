@@ -22,7 +22,7 @@ const PaginationTableRow = ({
           size="1"
           mr="2"
           disabled={isPreviousDisabled}
-          onClick={onClickNext}
+          onClick={onClickPrevious}
         >
           Previous
         </Button>
@@ -31,7 +31,7 @@ const PaginationTableRow = ({
           variant="outline"
           color="gray"
           disabled={isNextDisabled}
-          onClick={onClickPrevious}
+          onClick={onClickNext}
         >
           Next
         </Button>
