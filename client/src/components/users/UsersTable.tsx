@@ -1,41 +1,22 @@
-import { Skeleton, Table } from "@radix-ui/themes";
+import { Table } from "@radix-ui/themes";
 import PaginationTableRow from "@/components/shared/PaginationTableRow";
-import UsersTableRow from "./UsersTableRow";
-import type { Role, User, PaginationData } from "@/types";
+import UsersTableRow from "./UserTableRow";
+import type { User, PaginationData } from "@/types";
+import SkeletonTableRow from "@/components/shared/SkeletonTableRow";
 
 type UsersTableProps = {
   users: User[];
-  roles: Role[];
   showEmptyState: boolean;
   isLoading: boolean;
-  fetch: () => void;
   onClickNextPage: () => void;
   onClickPrevPage: () => void;
   paginationData?: PaginationData;
 };
 
-const UserSkeletonRow = () => (
-  <Table.Row>
-    <Table.Cell>
-      <Skeleton />
-    </Table.Cell>
-    <Table.Cell>
-      <Skeleton />
-    </Table.Cell>
-    <Table.Cell>
-      <Skeleton />
-    </Table.Cell>
-    <Table.Cell>
-      <Skeleton />
-    </Table.Cell>
-  </Table.Row>
-);
 const UsersTable = ({
-  users,
-  roles,
+  users = [],
   showEmptyState = false,
   isLoading = false,
-  fetch,
   paginationData,
   onClickNextPage,
   onClickPrevPage,
@@ -59,16 +40,11 @@ const UsersTable = ({
             </Table.Cell>
           </Table.Row>
         ) : isLoading ? (
-          [...Array(10)].map((_, idx) => <UserSkeletonRow key={idx} />)
-        ) : (
-          users.map((user) => (
-            <UsersTableRow
-              key={user.id}
-              user={user}
-              roles={roles}
-              fetch={fetch}
-            />
+          [...Array(10)].map((_, idx) => (
+            <SkeletonTableRow key={idx} colSpan={4} />
           ))
+        ) : (
+          users.map((user) => <UsersTableRow key={user.id} user={user} />)
         )}
         <PaginationTableRow
           onClickNext={onClickNextPage}

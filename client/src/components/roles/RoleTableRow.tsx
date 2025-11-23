@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DotsHorizontalIcon, StarFilledIcon } from "@radix-ui/react-icons";
-import { Table, Flex, DropdownMenu, IconButton } from "@radix-ui/themes";
+import { Table, Flex, DropdownMenu, IconButton, Badge } from "@radix-ui/themes";
 import type { Role } from "@/types";
 import EditRoleModal from "./EditRoleModal";
 import { formatDateTime } from "@/utils/dates";
@@ -21,8 +21,12 @@ const RoleTableRow = ({ role }: RoleTableRowProps) => {
     <Table.Row align="center">
       <Table.RowHeaderCell py="2">
         <Flex gap="2" align="center">
-          {role.isDefault && <StarFilledIcon aria-label="Default role" />}
           {role.name}
+          {role.isDefault && (
+            <Badge color="green" size="1" variant="surface">
+              Default
+            </Badge>
+          )}
         </Flex>
       </Table.RowHeaderCell>
       <Table.Cell>{role.description}</Table.Cell>

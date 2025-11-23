@@ -1,13 +1,13 @@
-import { AlertDialog, Button, Flex, Strong } from "@radix-ui/themes";
-import { useCallback } from "react";
-import { deleteUser } from "@/api/users";
+import { AlertDialog, Button, Callout, Flex, Strong } from "@radix-ui/themes";
+import { useState } from "react";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import useUserMutations from "@/hooks/mutations/useUserMutations";
 
 type DeleteUserModalProps = {
   userFullName: string;
   userId: string;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  refetch: () => void;
 };
 
 const DeleteUserModal = ({
@@ -15,34 +15,65 @@ const DeleteUserModal = ({
   userId,
   isOpen,
   onOpenChange,
-  refetch,
 }: DeleteUserModalProps) => {
-  const confirmDelete = useCallback(async () => {
-    await deleteUser(userId);
-    await refetch();
-    onOpenChange(false);
-    console.log(userId, " deleted");
-  }, [onOpenChange, userId, refetch]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState<Error | null>();
+
+  const { deleteUserAsync } = useUserMutations();
+
+  const confirmDelete = async () => {
+    setIsUpdating(true);
+    await deleteUserAsync(userId, {
+      onError: (error) => {
+        setError(error);
+        setIsUpdating(false);
+      },
+      onSuccess: () => {
+        setIsUpdating(false);
+        setError(null);
+      },
+    });
+  };
 
   return (
-    <AlertDialog.Root open={isOpen} onOpenChange={onOpenChange}>
+    <AlertDialog.Root
+      open={isOpen}
+      onOpenChange={(value) => {
+        setError(null);
+        setIsUpdating(false);
+        onOpenChange(value);
+      }}
+    >
       <AlertDialog.Content maxWidth="488px">
         <AlertDialog.Title>Delete user</AlertDialog.Title>
         <AlertDialog.Description size="2">
           Are you sure? The user <Strong>{userFullName}</Strong> will be
           permanently deleted.
         </AlertDialog.Description>
+        {error && (
+          <Callout.Root color="red" role="alert" mb="4" mt="4">
+            <Callout.Icon>
+              <ExclamationTriangleIcon />
+            </Callout.Icon>
+            <Callout.Text>
+              Oops! Something went wrong. Please try again.
+            </Callout.Text>
+          </Callout.Root>
+        )}
         <Flex gap="3" mt="4" justify="end">
           <AlertDialog.Cancel>
             <Button variant="outline" color="gray">
               Cancel
             </Button>
           </AlertDialog.Cancel>
-          <AlertDialog.Action onClick={confirmDelete}>
-            <Button variant="outline" color="red">
-              Delete User
-            </Button>
-          </AlertDialog.Action>
+          <Button
+            onClick={confirmDelete}
+            variant="outline"
+            color="red"
+            loading={isUpdating}
+          >
+            Delete User
+          </Button>
         </Flex>
       </AlertDialog.Content>
     </AlertDialog.Root>

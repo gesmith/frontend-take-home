@@ -5,11 +5,11 @@ import type { ChangeEventHandler } from "react";
 type SearchInputProps = {
   onChange?: ChangeEventHandler<HTMLInputElement>;
   placeholder?: string;
-  searchInputValue?: string;
+  value?: string;
 };
 
 const SearchInput = ({
-  searchInputValue = "",
+  value = "",
   onChange,
   placeholder = "Search by name...",
 }: SearchInputProps) => {
@@ -17,7 +17,7 @@ const SearchInput = ({
     <TextField.Root
       placeholder={placeholder}
       onChange={onChange}
-      value={searchInputValue}
+      value={value}
       aria-label={placeholder}
     >
       <TextField.Slot>

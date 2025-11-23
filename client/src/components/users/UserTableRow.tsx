@@ -7,26 +7,19 @@ import {
   DropdownMenu,
   IconButton,
 } from "@radix-ui/themes";
-import type { Role, User } from "@/types";
+import type { UserWithRole } from "@/types";
 import { formatDateTime } from "@/utils/dates";
 import DeleteUserModal from "./DeleteUserModal";
 
 type UsersTableRowProps = {
-  user: User;
-  roles: Role[];
-  fetch: () => void;
+  user: UserWithRole;
 };
 
-const findRole = (roles: Role[], roleId: string) => {
-  if (!roleId) return;
-  return roles?.find((role) => role.id === roleId);
-};
-
-const UsersTableRow = ({ user, roles, fetch }: UsersTableRowProps) => {
+const UserTableRow = ({ user }: UsersTableRowProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const userFullName = `${user.first} ${user.last}`;
-  const userRole = findRole(roles, user.roleId)?.name;
+  const userRole = user.role?.name;
   const formattedDate = formatDateTime(user.createdAt, {
     year: "numeric",
     month: "short",
@@ -76,11 +69,10 @@ const UsersTableRow = ({ user, roles, fetch }: UsersTableRowProps) => {
           isOpen={isDeleteModalOpen}
           userFullName={userFullName}
           userId={user.id}
-          refetch={fetch}
         />
       </Table.Cell>
     </Table.Row>
   );
 };
 
-export default UsersTableRow;
+export default UserTableRow;
