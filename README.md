@@ -40,6 +40,7 @@
 6. Optimistic state updates
 7. Create a more reusable Table component, or use something like Tanstack Table.
 8. Warnings when performing certain actions (e.g. deleting/editing a role when there are attached users.)
+9. Add tests, of course.
 
 ## Tasks Overview
 
