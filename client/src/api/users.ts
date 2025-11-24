@@ -1,4 +1,4 @@
-import type { User } from "@/types";
+import type { NewUser, User } from "@/types";
 
 const LOCAL_API_SERVER = "http://localhost:3002";
 
@@ -21,13 +21,21 @@ export const fetchUsers = async (
   return data;
 };
 
-export const deleteUser = async (userId: string): Promise<void> => {
-  const response = await fetch(`${LOCAL_API_SERVER}/users/${userId}`, {
-    method: "DELETE",
-  });
+export const addUser = async (user: NewUser): Promise<User> => {
+  const body = JSON.stringify({ ...user });
+  const req = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body,
+  };
+
+  const response = await fetch(`${LOCAL_API_SERVER}/users`, req);
   if (!response.ok) {
-    throw new Error("Server error: " + response.status);
+    throw new Error(`Response status: ${response.status}`);
   }
+  return response.json();
 };
 
 export const updateUser = async (user: User): Promise<User> => {
@@ -45,4 +53,13 @@ export const updateUser = async (user: User): Promise<User> => {
     throw new Error(`Response status: ${response.status}`);
   }
   return response.json();
+};
+
+export const deleteUser = async (userId: string): Promise<void> => {
+  const response = await fetch(`${LOCAL_API_SERVER}/users/${userId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Server error: " + response.status);
+  }
 };

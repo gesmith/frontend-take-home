@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DotsHorizontalIcon, StarFilledIcon } from "@radix-ui/react-icons";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Table, Flex, DropdownMenu, IconButton, Badge } from "@radix-ui/themes";
 import type { Role } from "@/types";
 import EditRoleModal from "./EditRoleModal";

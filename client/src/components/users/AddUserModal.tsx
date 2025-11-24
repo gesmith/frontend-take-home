@@ -5,35 +5,36 @@ import {
   Flex,
   TextField,
   Text,
-  TextArea,
   Callout,
   VisuallyHidden,
+  Select,
+  Badge,
 } from "@radix-ui/themes";
-import type { Role } from "@/types";
+import type { NewUser, Role } from "@/types";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import useRoleMutations from "@/hooks/mutations/useRoleMutations";
+import useUserMutations from "@/hooks/mutations/useUserMutations";
+import useRolesQuery from "@/hooks/query/useRolesQuery";
 
-type EditRoleModalProps = {
-  role: Role;
+type AddUserModalProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 };
 
-const EditRoleModal = ({ role, isOpen, onOpenChange }: EditRoleModalProps) => {
+const AddUserModal = ({ isOpen, onOpenChange }: AddUserModalProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<Error | null>();
 
-  const { updateRoleAsync } = useRoleMutations();
+  const { addUserAsync } = useUserMutations();
 
   // Keeping the form uncontrolled for now but if we wanted to add client-side validation, we can switch to controlled.
   const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const formJson = Object.fromEntries(formData.entries());
-    const updatedRole: Role = { ...role, ...formJson };
-    console.log(updatedRole);
+    const newUser = { ...formJson } as NewUser;
+    console.log(newUser);
     setIsUpdating(true);
-    await updateRoleAsync(updatedRole, {
+    await addUserAsync(newUser, {
       onError: (error) => {
         setError(error);
         setIsUpdating(false);
@@ -41,50 +42,66 @@ const EditRoleModal = ({ role, isOpen, onOpenChange }: EditRoleModalProps) => {
       onSuccess: () => {
         setIsUpdating(false);
         setError(null);
+        onOpenChange(false);
       },
     });
   };
 
+  const { data: roles } = useRolesQuery({});
+  const defaultRoleId = roles?.find((role: Role) => role.isDefault).id;
+
   return (
-    <Dialog.Root
-      open={isOpen}
-      onOpenChange={(value) => {
-        setError(null);
-        setIsUpdating(false);
-        onOpenChange(value);
-      }}
-    >
+    <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
       <Dialog.Content maxWidth="450px">
-        <Dialog.Title>Edit role</Dialog.Title>
+        <Dialog.Title>Add new user</Dialog.Title>
         <VisuallyHidden>
-          <Dialog.Description mb="2">Edit {role.name}</Dialog.Description>
+          <Dialog.Description mb="2">Add new user</Dialog.Description>
         </VisuallyHidden>
         <form method="patch" onSubmit={onSubmit}>
           <Flex direction="column" gap="3">
             <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                Name
+              <Text as="div" size="2" weight="bold">
+                First name
               </Text>
             </label>
             <TextField.Root
-              name="name"
               required
-              defaultValue={role.name}
-              placeholder="Enter the role's name"
+              name="first"
+              placeholder="First name"
               disabled={isUpdating}
             />
             <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                Description
+              <Text as="div" size="2" weight="bold">
+                Last name
               </Text>
             </label>
-            <TextArea
-              name="description"
+            <TextField.Root
+              name="last"
+              placeholder="Last name"
               required
-              defaultValue={role.description}
-              placeholder="Enter the role's description"
               disabled={isUpdating}
             />
+            <label>
+              <Text as="div" size="2" weight="bold">
+                Role
+              </Text>
+            </label>
+            <Select.Root
+              name="roleId"
+              size="2"
+              defaultValue={defaultRoleId}
+              disabled={isUpdating}
+              required
+            >
+              <Select.Trigger />
+              <Select.Content>
+                {roles?.map((role: Role) => (
+                  <Select.Item key={role.id} value={role.id}>
+                    {role.isDefault ? <Badge>Default</Badge> : ""} {role.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
           </Flex>
           {error && (
             <Callout.Root color="red" role="alert" mt="3" mb="3">
@@ -93,6 +110,12 @@ const EditRoleModal = ({ role, isOpen, onOpenChange }: EditRoleModalProps) => {
               </Callout.Icon>
               <Callout.Text>
                 Oops! Something went wrong. Please try again.
+                {error.message && (
+                  <>
+                    <br />
+                    {error.message}
+                  </>
+                )}
               </Callout.Text>
             </Callout.Root>
           )}
@@ -112,4 +135,4 @@ const EditRoleModal = ({ role, isOpen, onOpenChange }: EditRoleModalProps) => {
   );
 };
 
-export default EditRoleModal;
+export default AddUserModal;

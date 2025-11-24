@@ -1,5 +1,5 @@
-import { updateUser, deleteUser } from "@/api/users";
-import type { User } from "@/types";
+import { addUser, updateUser, deleteUser } from "@/api/users";
+import type { NewUser, User } from "@/types";
 import {
   useMutation,
   useQueryClient,
@@ -8,6 +8,28 @@ import {
 
 const useUserMutations = () => {
   const queryClient = useQueryClient();
+
+  const addUserMutation = useMutation({
+    mutationFn: (newUser: NewUser) => {
+      return addUser(newUser);
+    },
+    onError: (error) => {
+      console.log("Edit user error: ", error);
+      return error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
+    },
+  });
+
+  const addUserAsync = async (
+    newUser: NewUser,
+    options?: MutateOptions<NewUser, Error, NewUser, unknown> | undefined
+  ) => {
+    return await addUserMutation.mutateAsync(newUser, options);
+  };
 
   const updateUserMutation = useMutation({
     mutationFn: (updatedUser: User) => {
@@ -54,6 +76,7 @@ const useUserMutations = () => {
   };
 
   return {
+    addUserAsync,
     updateUserAsync,
     deleteUserAsync,
   };

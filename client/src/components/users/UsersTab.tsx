@@ -3,6 +3,7 @@ import { ExclamationTriangleIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Tabs, Flex, Box, Button, Callout } from "@radix-ui/themes";
 import SearchInput from "@/components/shared/SearchInput";
 import useUsersQuery from "@/hooks/query/useUsersQuery";
+import AddUserModal from "./AddUserModal";
 
 const UsersTable = React.lazy(() => import("@/components/users/UsersTable"));
 
@@ -10,6 +11,8 @@ const UsersTab = () => {
   const [searchInputValue, setSearchInputValue] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setCurrentPage] = useState(1);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const {
     isPending,
     isError,
@@ -48,7 +51,7 @@ const UsersTab = () => {
           />
         </Box>
         <Box>
-          <Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
             <PlusIcon /> Add User
           </Button>
         </Box>
@@ -72,6 +75,7 @@ const UsersTab = () => {
           showEmptyState={Boolean(searchInputValue && usersData?.length === 0)}
         />
       )}
+      <AddUserModal isOpen={isAddModalOpen} onOpenChange={setIsAddModalOpen} />
     </Tabs.Content>
   );
 };

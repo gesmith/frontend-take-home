@@ -12,6 +12,8 @@ export interface UserWithRole extends Omit<User, "roleId"> {
   role?: Role;
 }
 
+export type NewUser = Pick<User, "first" | "last" | "roleId">;
+
 export interface Role {
   id: string;
   createdAt: string;
